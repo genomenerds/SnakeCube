@@ -15,7 +15,7 @@ The Genome Assembly pipeline, is the most benchmarked and optimized pipeline in 
 In its directory, you can find the user guide and its info, its source code and all the files related to its testing and optimization process.
 
 
-### Citation and Credit ###
+### Citation and Credits ###
 The pipelines were developed and tested by Nelina Angelova, with the kind support of the HPC team of IMBBC, HCMR.
 Contact: tereza@hcmr.gr
 Please cite accordingly: Zenodo
