@@ -1,0 +1,104 @@
+
+'''THIS PIPELINE CHECKS THE SHORT-READ RAW DATA FOR THEIR QUALITY,
+   TRIMS, AND THEN RE-CHECKS THE QUALITY OF THE TRIMMED DATA'''
+
+
+
+configfile: "config.yaml"
+
+
+
+rule all:
+    input:
+        config["Sdatadir"]+"/Multiq_raw_report",
+        config["Sdatadir"]+"/trimmomatic_output",
+        config["Sdatadir"]+"/Multiq_trimmed_report"
+
+
+
+
+rule fastq_c:
+    input:
+        config["Sdatadir"]
+    output:
+        directory(config["Sdatadir"]+"/quals")
+    params:
+        qr = "quals"
+    threads:
+        int(int(config["Available_Cores"]) * 0.2)
+    conda:
+        "SQTQ.yml"
+    script:
+        "fastqc.py"
+
+
+
+
+rule multiq_c:
+    input:
+        config["Sdatadir"]+"/quals"
+    params:
+        trimmed = False
+    output:
+        directory(config["Sdatadir"]+"/Multiq_raw_report")
+    threads: 1
+    conda:
+        "SQTQ.yml"
+    script:
+        "multiqc.py"
+
+
+
+
+rule trimming_s:
+    input:
+        config["Sdatadir"]
+    params:
+        leading = config["LEADING"],
+        sliding = config["SLIDINGWINDOW"],
+        trailing = config["TRAILING"],
+        avg = config["AVGQUAL"],
+        minlen = config["MINLEN"]
+    output:
+        directory(config["Sdatadir"]+"/trimmomatic_output")
+    threads:
+        int(int(config["Available_Cores"]) * 0.4)
+    conda:
+        "SQTQ.yml"
+    script:
+        "trimmomatic.py"
+
+
+
+
+rule fastq_c_t:
+    input:
+         config["Sdatadir"]+"/trimmomatic_output"
+    output:
+        directory( config["Sdatadir"]+"/tquals")
+    params:
+        qr = "../tquals"
+    threads:
+        int(int(config["Available_Cores"]) * 0.2)
+    conda:
+        "SQTQ.yml"
+    script:
+        "fastqc.py"
+
+
+
+
+rule multiq_c_t:
+    input:
+        config["Sdatadir"]+"/tquals"
+    params:
+        trimmed = True
+    output:
+        directory(config["Sdatadir"]+"/Multiq_trimmed_report")
+    threads: 1
+    conda:
+        "SQTQ.yml"
+    script:
+        "multiqc.py"
+
+

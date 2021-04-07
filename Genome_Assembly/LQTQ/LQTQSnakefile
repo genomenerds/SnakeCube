@@ -1,0 +1,56 @@
+
+'''THIS PIPELINE CHECKS THE LONG-READS RAW DATA FOR THEIR QUALITY,
+   TRIMS, AND THEN RE-CHECKS THE QUALITY OF THE TRIMMED DATA'''
+
+
+configfile: "config.yaml"
+
+rule all:
+    input:
+        config["Ldatadir"]+"/porechop_output.fastq.gz",
+        config["Ldatadir"]+"/Nano_Raw_Report",
+        config["Ldatadir"]+"/Nano_Trimmed_Report"
+
+rule nanoq_c:
+    input:
+        config["Ldatadir"]
+    output:
+        directory(config["Ldatadir"]+"/Nano_Raw_Report")
+    params:
+        Trimmed = False
+    threads:
+        int(int(config["Available_Cores"]) * 0.1)
+    conda:
+        "LQTQ.yml"
+    script:
+        "nanoqc.py"
+
+
+
+rule trimming_l:
+    input:
+        config["Ldatadir"]
+    output:
+        config["Ldatadir"]+"/porechop_output.fastq.gz"
+    threads:
+        int(int(config["Available_Cores"]) * 0.8)
+    conda:
+        "LQTQ.yml"
+    script:
+        "trim.py"
+
+
+
+rule nanoq_c_t:
+    input:
+         config["Ldatadir"]+"/porechop_output.fastq.gz"
+    output:
+         directory(config["Ldatadir"]+"/Nano_Trimmed_Report")
+    params:
+        Trimmed = True
+    threads:
+        int(int(config["Available_Cores"]) * 0.1)
+    conda:
+        "LQTQ.yml"
+    script:
+        "nanoqc.py"

@@ -1,0 +1,27 @@
+Bootstrap: docker
+
+From: continuumio/miniconda3
+
+%files 
+    SQTQ.yml
+    SQTQSnakefile
+    trimmomatic.py
+    multiqc.py
+    fastqc.py
+    
+
+%environment
+    PATH=/opt/conda/envs/$(head -1 /SQTQ.yml | cut -d' ' -f2)/bin:$PATH
+
+%post
+    apt-get install nano
+    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc
+    /opt/conda/bin/conda env create -f SQTQ.yml
+    echo "source activate $(head -1 SQTQ.yml | cut -d' ' -f2)" > ~/.bashrc
+
+%runscript
+    source activate /opt/conda/envs/SQTQ
+    snakemake -j --snakefile /SQTQSnakefile --use-conda --nolock --quiet --keep-going --force-use-threads
+    snakemake -j --snakefile /SQTQSnakefile --dag | dot -Tpdf > DAG.pdf
+    snakemake -j --snakefile /SQTQSnakefile --summary > Summary.txt
+

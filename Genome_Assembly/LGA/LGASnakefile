@@ -1,0 +1,142 @@
+
+
+configfile: "config.yaml"
+
+
+rule all:
+    input:
+    	config["Ldatadir"]+"/Nano_Raw_Report",
+    	config["Ldatadir"]+"/porechop_output.fastq.gz",
+    	config["Ldatadir"]+"/Nano_Trimmed_Report",
+    	config["Ldatadir"]+"/Assemblies/Flye/assembly.fasta",
+    	config["Ldatadir"]+"/Quast_Results/QA_1",
+    	config["Ldatadir"]+"/Busco_Results/QA_1",
+    	config["Ldatadir"]+"/Assemblies/Medaka_Results/consensus.fasta",
+    	config["Ldatadir"]+"/Quast_Results/QA_2",
+	config["Ldatadir"]+"/Busco_Results/QA_2"
+
+
+rule nanoq_c:
+    input:
+        config["Ldatadir"]
+    output:
+        directory(config["Ldatadir"]+"/Nano_Raw_Report")
+    params:
+        Trimmed = False
+    threads:
+	int(int(config["Available_Cores"]) * 0.1)
+    group : "1"
+    conda:
+        "LQTQ.yml"
+    script:
+        "nanoqc.py"
+
+
+
+rule trimming_l:
+    input:
+        config["Ldatadir"]
+    output:
+        config["Ldatadir"]+"/porechop_output.fastq.gz"
+    threads:
+        int(int(config["Available_Cores"]) * 0.8)
+    group : "1"
+    conda:
+        "LQTQ.yml"
+    script:
+        "trim.py"
+
+
+
+rule nanoq_c_t:
+    input:
+         config["Ldatadir"]+"/porechop_output.fastq.gz"
+    output:
+         directory(config["Ldatadir"]+"/Nano_Trimmed_Report")
+    params:
+        Trimmed = True
+    threads:
+	int(int(config["Available_Cores"]) * 0.1)
+    group : "1"
+    conda:
+        "LQTQ.yml"
+    script:
+        "nanoqc.py"
+
+
+
+
+rule FlyeAssGenie:
+    input:
+        config["Ldatadir"],
+        config["Ldatadir"]+"/porechop_output.fastq.gz"
+    output:
+        config["Ldatadir"]+"/Assemblies/Flye/assembly.fasta"
+    conda:
+        "FlyeAss.yml"
+    threads:
+	int(int(config["Available_Cores"]) *1)
+    params:
+        ShortR = config["Sdatadir"],
+        GSE = config["GSE"],
+        S = config["Short_Reads"],
+    script:
+        "FlyeAssGenie.py"
+
+
+
+
+rule QA_1:
+    input:
+        config["Ldatadir"]+"/Assemblies/Flye/assembly.fasta"
+    output:
+        directory(config["Ldatadir"]+"/Quast_Results/QA_1"),
+        directory(config["Ldatadir"]+"/Busco_Results/QA_1")
+    params:
+        Lineage = config["LINEAGE"],
+        SP = config["SP"]
+    threads:
+	int(int(config["Available_Cores"]) * 0.4)
+    group : "2"
+    conda:
+        "QAssembly.yml"
+    script:
+        "QAssembly.py"
+
+
+
+rule Polish:
+    input:
+        config["Ldatadir"]+"/Assemblies/Flye/assembly.fasta",
+        config["Ldatadir"]+"/porechop_output.fastq.gz"
+    output:
+        config["Ldatadir"]+"/Assemblies/Medaka_Results/consensus.fasta"
+    conda:
+        "Polishing.yml"
+    threads:
+	int(int(config["Available_Cores"]) * 0.5)
+    group : "2"
+    params:
+        i = config["ITER"]
+    script:
+        "Polishing.py"
+
+
+
+
+rule QA_2:
+    input:
+        config["Ldatadir"]+"/Assemblies/Medaka_Results/consensus.fasta"
+    output:
+        directory(config["Ldatadir"]+"/Quast_Results/QA_2"),
+        directory(config["Ldatadir"]+"/Busco_Results/QA_2")
+    params:
+        Lineage = config["LINEAGE"],
+        SP = config["SP"]
+    conda:
+        "QAssembly.yml"
+    threads:
+	int(int(config["Available_Cores"]) * 1)
+    script:
+        "QAssembly.py"
+

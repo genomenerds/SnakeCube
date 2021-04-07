@@ -1,0 +1,52 @@
+Bootstrap: docker 
+
+From: continuumio/miniconda3
+
+%files
+    LQTQ.yml
+    FlyeAss.yml
+    Polishing.yml
+    QAssembly.yml
+    trim.py
+    nanoqc.py
+    FlyeAssGenie.py
+    Polishing.py
+    QAssembly.py
+    run_BUSCO.py
+    BUSCOconfig.ini
+    LGASnakefile
+    config
+
+%environment
+    PATH=/opt/conda/envs/$(head -1 /LQTQ.yml | cut -d' ' -f2)/bin:$PATH
+    PATH=/opt/conda/envs/$(head -1 /FlyeAss.yml | cut -d' ' -f2)/bin:$PATH 
+    PATH=/opt/conda/envs/$(head -1 /Polishing.yml | cut -d' ' -f2)/bin:$PATH
+    PATH=/opt/conda/envs/$(head -1 /QAssembly.yml | cut -d' ' -f2)/bin:$PATH
+    export PATH=" miniconda3/pkgs/augustus-3.1-0/bin:$PATH"
+    export PATH=" miniconda3/pkgs/augustus-3.1-0/scripts:$PATH"
+    export AUGUSTUS_CONFIG_PATH="config/"
+
+
+%post
+    apt-get install nano
+    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc
+
+    /opt/conda/bin/conda env create -f LQTQ.yml  
+    /opt/conda/bin/conda env create -f FlyeAss.yml
+    /opt/conda/bin/conda env create -f Polishing.yml
+    /opt/conda/bin/conda env create -f QAssembly.yml
+
+    echo "source activate $(head -1 LQTQ.yml | cut -d' ' -f2)" > ~/.bashrc
+    echo "source activate $(head -1 FlyeAss.yml | cut -d' ' -f2)" > ~/.bashrc 
+    echo "source activate $(head -1 Polishing.yml | cut -d' ' -f2)" > ~/.bashrc
+    echo "source activate $(head -1 QAssembly.yml | cut -d' ' -f2)" > ~/.bashrc
+
+
+%runscript
+    cp -R /config .
+    source activate /opt/conda/envs/LQTQ
+    snakemake -j --snakefile /LGASnakefile --use-conda --quiet --nolock --keep-going --force-use-threads
+    snakemake -j --snakefile /LGASnakefile --dag | dot -Tpdf > DAG.pdf
+    snakemake -j --snakefile /LGASnakefile --summary > Summary.txt
+    rm -R config
+    rm -R tmp
