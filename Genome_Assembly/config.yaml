@@ -1,0 +1,55 @@
+
+
+# THIS IS THE CONFIGURATION FILE, WHERE YOU CAN FEED THE UPCOMING ANALYSIS WITH PARAMETERS OF YOUR CHOICE, BY CHANGING THE GIVEN DEFAULT VALUES
+# EACH PARAMETER MAY BE PRECEDED BY A BRIEF DESCRIPTION AND THE TYPE OF VARIABLE YOU SHOULD PROVIDE, IF NECESSARY
+# LEAVE EMPTY " " FOR NO INPUT
+# IF YOU HAVE DOWNLOADED BOTH FILES (config.yaml and _.simg) WITH wget, THE FILES MIGHT BE RENAMED DURING DOWNLOADING. IF SO, PLEASE REVERSE IT.  
+
+# ***IMPORTANT DIRECTORY AND USAGE INSTRUCTIONS*** PLEASE READ CAREFULLY BEFORE PROCEEDING!
+# 1. There is an online user-guide for how you should run the images and handle their results. Please read it thoroughly at: https://nellieangelova.github.io/De-Novo_Genome_Assembly_Pipelines/ 
+# 2. This file should be downloaded and copied into the EXACT same directory the image you have chosen is copied into.
+# 3. The directory you are hosting the image and this file into, should be EMPTY, as and the directories of your raw data you are gonna give below, from any unecessary file.
+# 4. If you wish to re-run the pipeline for any reason (errors or verifications), make sure to firstly delete or move any already created output to avoid conflicts.
+
+
+# ***IMPORTANT RAW DATA INSTRUCTIONS*** PLEASE READ CAREFULLY BEFORE PROCEEDING!
+# 1. Your data should follow the fastq format (".fastq" in the extension, compressed or not.)
+# 2. Concatenate your long-reads samples a priori if you have more than one files
+# 3. Make sure that your forward and reverse fastq files of a sample have the exact same names, and the "R1" and "R2" reference strings in their ends accordingly (short pair-end reads)
+     #e.g.: "Sample_01_R1.fastq" for forward, "Sample_01_R2.fastq" for reverse
+
+
+Available_Cores: "20" #The number of available cores in the environment you are gonna run the image. The optimity is accomplished when running with cpus multiples of ten (10,20,30 etc.).
+
+Short_Reads: "y" # Will you use short reads for the build of your assembly? (str,"y"|"n") If "y", please fill the ABOUT SHORT READS section below. If "n", please provide an GSE estimation.
+GSE: " " #Genome Size Estimation, mandatory if you are not going to use short reads in your analysis. In g. e.g.:"0.8g"
+
+
+
+### ABOUT SHORT READS
+
+Sdatadir: "raw_data/FastqFiles/Illumina" #The dir containing your short raw data (type:str). Give your paths RELATIVELY to the directory you have copied the image into (the folder of the image is the starting point). Do not add "/" at the start and end of the string.
+
+#TRIMMOMATIC (str)
+MINLEN: "75" # Drop the read if it is below a specified length
+SLIDINGWINDOW: "4:15" # Performs a sliding window trimming approach. 
+LEADING: "10" # Cut bases off the start of a read, if below a threshold quality 
+TRAILING: "10" # Cut bases off the end of a read, if below a threshold quality  
+AVGQUAL: "30" # Drop the read if the average quality is below the specified level 
+
+
+
+
+### ABOUT LONG READS
+
+Ldatadir: "raw_data/FastqFiles/MinION" #The dir containing your long raw data (type:str). Give your paths RELATIVELY to the directory you have copied the image into (the folder of the image is the starting point). Do not add "/" at the start and end of the string.
+
+ITER: "2" #Iterations of Racon Polishing (str)
+
+
+#BUSCO  *** PLEASE use only v3 datasets for running busco, which you can find  here: https://busco-archive.ezlab.org/v3/
+LINEAGE: "actinopterygii_odb9" # Write the name of the dataset with lower case along with its od$
+SP: "zebrafish" # The model organism for busco (str)
+
+
+XMX: "100G" #The java -Xmx parameter based on the resources of the environment you are going to run into, for Pilon.
