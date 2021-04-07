@@ -11,9 +11,11 @@ In its directory, you can find the user guide and its info, its source code and 
 
 
 ### Citation and Credits ###
-The pipeline was developed and tested by Nelina Angelova, with the support of the HPC team of IMBBC, HCMR.
+The pipeline was developed and tested by Nelina Angelova et al., with the support of the HPC team of IMBBC, HCMR.
 Contact: tereza@hcmr.gr
-Please cite accordingly: Zenodo
+
+Please cite accordingly: 
+Zenodo: https://doi.org/10.5281/zenodo.4670966
 
 
 
